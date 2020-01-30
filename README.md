@@ -1,4 +1,6 @@
-# Hello WebXR!
+# Hello WebXR with 3dRudder support!
+
+* 3dRudder-js : 2.0.7 [npm](https://www.npmjs.com/package/3drudder-js)
 
 ![screenshot](assets/sshot.jpg)
 

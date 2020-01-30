@@ -32,6 +32,10 @@ import * as roomSound from './rooms/Sound.js';
 
 import {shaders} from './lib/shaders.js';
 
+// Add 3dRudder SDK
+import * as Sdk3dRudder from '3drudder-js';
+var SDK = new Sdk3dRudder({"schemeWs": "ws"});
+
 import WebXRPolyfill from 'webxr-polyfill';
 const polyfill = new WebXRPolyfill();
 
@@ -268,6 +272,7 @@ export function init() {
     teleport = new Teleport(context);
     context.teleport = teleport;
 
+    setup3dRudder();
     setupControllers();
     roomHall.setup(context);
     roomPanorama.setup(context);
@@ -291,6 +296,39 @@ export function init() {
   },
   debug);
 
+}
+
+function setup3dRudder() {
+  SDK.init();
+  SDK.on('connectedDevice', function(device) {            
+    if (device.connected) {
+      //connected = true;
+      // sample curves 
+      var controller = SDK.controllers[device.port];        
+      controller.setAxesParam({
+        roll2YawCompensation: 0.0,
+        nonSymmetricalPitch: true,
+        curves: {
+          leftright: {deadzone: 0.15, xSat: 1.0, exp: 2.0},
+          forwardbackward: {deadzone: 0.15, xSat: 1.0, exp: 2.0},					
+          updown: {deadzone: 0.15, xSat: 1.0, exp: 2.0},
+          rotation: {deadzone: 0.15, xSat: 1.0, exp: 1.0}
+        }
+      });
+    } else {
+      //connected = false;
+    }
+  });
+}
+
+function update3dRudder() {
+  var controller = SDK.controllers[0];
+  if (controller.connected) {
+    context.cameraRig.translateZ(-controller.axis.forwardbackward);
+    context.cameraRig.rotation.y += THREE.Math.degToRad(-controller.axis.rotation);
+    context.cameraRig.translateX(controller.axis.leftright);
+    context.cameraRig.translateY(controller.axis.updown);
+  }
 }
 
 function setupControllers() {
@@ -386,6 +424,7 @@ function animate() {
     gotoRoom(context.goto);
     context.goto = null;
   }
+  update3dRudder();
 }
 
 window.onload = () => {init()};

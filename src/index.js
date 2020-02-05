@@ -306,7 +306,7 @@ function setup3dRudder() {
       // sample curves 
       var controller = SDK.controllers[device.port];        
       controller.setAxesParam({
-        roll2YawCompensation: 0.0,
+        roll2YawCompensation: 0.15,
         nonSymmetricalPitch: true,
         curves: {
           leftright: {deadzone: 0.15, xSat: 1.0, exp: 2.0},
@@ -321,13 +321,13 @@ function setup3dRudder() {
   });
 }
 
-function update3dRudder() {
+function update3dRudder(delta) {
   var controller = SDK.controllers[0];
   if (controller.connected) {
-    context.cameraRig.translateZ(-controller.axis.forwardbackward);
-    context.cameraRig.rotation.y += THREE.Math.degToRad(-controller.axis.rotation);
-    context.cameraRig.translateX(controller.axis.leftright);
-    context.cameraRig.translateY(controller.axis.updown);
+    context.cameraRig.translateZ(-controller.axis.forwardbackward * delta);
+    context.cameraRig.rotation.y += (-controller.axis.rotation * delta);
+    context.cameraRig.translateX(controller.axis.leftright * delta);
+    context.cameraRig.translateY(controller.axis.updown * delta);
   }
 }
 
@@ -424,7 +424,7 @@ function animate() {
     gotoRoom(context.goto);
     context.goto = null;
   }
-  update3dRudder();
+  update3dRudder(delta);
 }
 
 window.onload = () => {init()};
